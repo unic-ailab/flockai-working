@@ -1,0 +1,77 @@
+#VRML_SIM R2020b utf8
+WorldInfo {
+  info [
+    "This demonstration shows a DJI Mavic 2 PRO flying over a rural area."
+    "After the drone has taken off, you can control it with the keyboard of your computer."
+  ]
+  title "DJI Mavic 2 PRO demo"
+  basicTimeStep 8
+  defaultDamping Damping {
+    linear 0.5
+    angular 0.5
+  }
+  coordinateSystem "NUE"
+}
+Viewpoint {
+  orientation 0.08738127870281735 -0.9918765361059698 -0.09244159915689235 4.639771224441785
+  position 5.281562013980359 1.8046680615559194 -0.049606257117253416
+  near 0.2
+  follow "Mavic 2 PRO"
+  followSmoothness 0.2
+}
+TexturedBackground {
+  luminosity 3
+}
+TexturedBackgroundLight {
+}
+Floor {
+  size 400 400
+  tileSize 6 6
+  appearance SandyGround {
+  }
+}
+SquareManhole {
+  translation 0 -0.03 0.39
+}
+Mavic2Pro {
+  translation 0.0004269397238897549 0.0857081901577127 0.004400759100639828
+  rotation -0.026581807966150568 -0.7068388527497693 -0.7068749845118587 -3.0961189627946433
+  controller "test_comms"
+  bodySlot [
+    Emitter {
+      rotationStep 0.261803
+      channel 1
+    }
+    Receiver {
+      channel 1
+    }
+  ]
+  cameraSlot [
+    Camera {
+      width 400
+      height 240
+      near 0.2
+    }
+  ]
+}
+Mavic2Pro {
+  translation 0.10569562243338763 0.06570872787430582 0.7107068677715829
+  rotation -0.025505509550103896 -0.7069066546060055 -0.7068468367732399 -3.093974708992755
+  name "Mavic 2 PRO(1)"
+  controller "test_comms"
+  bodySlot [
+    Emitter {
+      channel 1
+    }
+    Receiver {
+      channel 1
+    }
+  ]
+  cameraSlot [
+    Camera {
+      width 400
+      height 240
+      near 0.2
+    }
+  ]
+}
