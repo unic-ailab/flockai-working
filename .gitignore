@@ -130,3 +130,10 @@ dmypy.json
 
 #pycharm
 .idea
+
+# Image data
+simulations/images/*
+!simulations/images/.gitkeep
+
+# Running simulations
+worlds/.mavic_2_pro.wbproj
