@@ -3,6 +3,9 @@ import math
 from controller import Keyboard, Robot, Emitter, Receiver, Camera, InertialUnit, GPS, Compass, Gyro, LED, Motor
 from utility import Graphics
 
+def M_PI():
+    return 3.14159
+
 class DroneUtils(Robot):
     def __init__(self):
         super(DroneUtils, self).__init__()
@@ -155,7 +158,9 @@ class DroneUtils(Robot):
         :return: None
         """
         roll, pitch, yaw = self.imu.getRollPitchYaw()
-        roll += math.pi / 2
+        #changed
+        roll += M_PI() / 2
+        
         altitude = self.gps.getValues()[1]
         roll_acceleration, pitch_acceleration, yaw_acceleration = self.gyro.getValues()
 
@@ -175,9 +180,11 @@ class DroneUtils(Robot):
             elif key_input == Keyboard.DOWN:
                 pitch_disturbance = -2.0
             elif key_input == Keyboard.RIGHT:
-                pitch_disturbance = 1.3
+                #changed
+                yaw_disturbance = 1.3
             elif key_input == Keyboard.LEFT:
-                pitch_disturbance = -1.3
+                #changed
+                yaw_disturbance = -1.3
             elif key_input == Keyboard.SHIFT + Keyboard.UP:
                 self.target_altitude += 0.05
             elif key_input == Keyboard.SHIFT + Keyboard.DOWN:
@@ -188,7 +195,8 @@ class DroneUtils(Robot):
                 roll_disturbance = 1.0
             key_input = self.keyboard.getKey()
 
-        roll_input = self.K_ROLL_P * Graphics.clamp(roll, -1.0, 1.0) - roll_acceleration + roll_disturbance
+        #changed
+        roll_input = self.K_ROLL_P * Graphics.clamp(roll, -1.0, 1.0) + roll_acceleration + roll_disturbance
         pitch_input = self.K_PITCH_P * Graphics.clamp(pitch, -1.0, 1.0) - pitch_acceleration + pitch_disturbance
         yaw_input = yaw_disturbance
         clamped_difference_altitude = Graphics.clamp(self.target_altitude - altitude + self.K_VERTICAL_OFFSET, -1.0,1.0)

@@ -34,10 +34,11 @@ class Drone(DroneUtils):
             self.send_message(StringGenerator.get_random_message(4))
             # Receive messages
             self.receive_messages()
-            if t.is_alive():
-                print(f"Task {t.native_id} did not finish :(")
-            else:
-                print(f"Task {t.native_id} finished")
+            #changed
+            #if t.is_alive():
+            #    print(f"Task {t.native_id} did not finish :(")
+            #else:
+            #    print(f"Task {t.native_id} finished")
 
 
 # Create drone instance and run its controller

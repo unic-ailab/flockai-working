@@ -30,7 +30,8 @@ class IntensiveThread(threading.Thread):
         Runs an intensive task based on the intensity level
         :return:
         """
-        print(f"Doing a {self.intensity} intensive task. ID: {self.native_id}")
+        #changed
+        #print(f"Doing a {self.intensity} intensive task. ID: {self.native_id}")
 
         for i in range(self.number):
             continue
