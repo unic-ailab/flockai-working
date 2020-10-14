@@ -4,6 +4,7 @@ import random
 import string
 import yaml
 import os
+from singleton import Singleton
 
 
 class IntensityLevel(enum.IntEnum):
@@ -36,7 +37,7 @@ class IntensiveThread(threading.Thread):
         for i in range(self.number):
             continue
 
-        print("Done doing some intensive task")
+        # print("Done doing some intensive task")
 
 
 class StringGenerator:
@@ -64,17 +65,18 @@ class Graphics:
         return low if value < low else high if value > high else value
 
 
-class SimulationConfig:
+class SimulationConfig(metaclass=Singleton):
 
     def __init__(self):
         self.config_file = "../../simulations/config.yaml"
         self.data = None
+        self.simulation_enabled = False
         self._read_config()
         self._update_config()
 
     def _read_config(self):
         stream = open(self.config_file, 'r')
-        self.data = yaml.load(stream)
+        self.data = yaml.safe_load(stream)
 
         self.simulation_id = self.data['simulation_id']
         self.simulation_image_directory = f"{self.data['image_directory']}{str(self.simulation_id)}/"
