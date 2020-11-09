@@ -132,8 +132,8 @@ dmypy.json
 .idea
 
 # Image data
-simulations/images/*
-!simulations/images/.gitkeep
+simulation/simulations/images/*
+!simulation/simulations/images/.gitkeep
 
 # Running simulations
-worlds/.mavic_2_pro.wbproj
+simulation/worlds/.mavic_2_pro.wbproj
