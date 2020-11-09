@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="flockai",
-    version="0.0.2",
+    version="0.0.6",
     author="kosnet",
     author_email="kosnet@kosnet.com",
     description="A machine learning webots extension",

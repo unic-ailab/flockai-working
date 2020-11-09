@@ -136,4 +136,7 @@ simulation/simulations/images/*
 !simulation/simulations/images/.gitkeep
 
 # Running simulations
-simulation/worlds/.mavic_2_pro.wbproj
+simulation/worlds/.*
+
+# pypi
+.pypirc
