@@ -26,7 +26,7 @@ This repository contains
     password = the_password
   ```
 
-##### Development Pipeline
+##### Running the first time
 1. `make config`
     Copies the `.pypirc` to your user home folder and allows automated uploads using twine.
 2. `make requirements`
@@ -34,10 +34,16 @@ This repository contains
 3. `make package`
     Generates the new package under the `dist/` directory.
 4. `make upload`
-    Uploads the package in the specified pypi repository. **Note**: The version number should be upgraded in `setup.py` in order to push to the repository (ie. 0.0.1 -> 0.0.2) 
+    Uploads the package in the specified pypi repository.  
 5. `make install`
-    Install Flock AI in Webots home folder to be used as a library.
+    Installs Flock AI in Webots home folder to be used as a library.
 6. `make clean` (*Optional*)
     Cleans the build directory. This step should be done before rebuilding the package.
+
+##### Development pipelines
+1. `make`
+    Clean previous build files, builds new package, uploads to pypi.
+2. `make install`
+    Installs new version of Flock AI in Webots home folder to be used as a library.
 
  

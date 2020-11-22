@@ -1,3 +1,4 @@
+all: clean package upload install
 
 package:
 	python3 setup.py sdist bdist_wheel
@@ -10,10 +11,11 @@ upload:
 	python3 -m twine upload dist/*
 
 install:
-	python3 -m pip install --upgrade --target=$(PYTHONPATH) flockai
+	python3 -m pip install --no-cache-dir --upgrade --target=$(PYTHONPATH) flockai
 
 requirements:
 	python3 -m pip install --user -r requirements.txt
 
 clean:
-	sudo -S rm -r dist/*
+	sudo -S rm -r dist/* build/*
+
