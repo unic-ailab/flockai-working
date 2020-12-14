@@ -10,15 +10,7 @@ class IRobot(Robot, abc.ABC):
         super(IRobot, self).__init__()
 
     @abc.abstractmethod
-    def _initialize(self):
-        """
-        The actions needed to initialize a drone
-        :return:
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def _attach_and_enable_devices(self):
+    def _attach_and_enable_devices(self, en_devices, nen_devices):
         """
         Attach and enable the devices on a drone
         :return:
@@ -26,7 +18,7 @@ class IRobot(Robot, abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _attach_and_enable_motors(self):
+    def _attach_and_enable_motors(self, motor_devices):
         """
         Attach and enable the motors on a drone
         :return:

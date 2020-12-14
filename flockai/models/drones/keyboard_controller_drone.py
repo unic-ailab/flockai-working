@@ -7,9 +7,9 @@ class KeyboardControlledDrone(IDrone, abc.ABC):
     """
     Defines a drone which can be controlled with keyboard controls
     """
-    def __init__(self):
-        super().__init__()
 
+    def __init__(self, en_devices, nen_devices, motor_devices):
+        super().__init__(en_devices, nen_devices, motor_devices)
 
     @classmethod
     def display_controls(cls):
@@ -37,7 +37,10 @@ class KeyboardControlledDrone(IDrone, abc.ABC):
         pitch_disturbance = 0
         yaw_disturbance = 0
 
-        key_input = self.keyboard.getKey()
+        def get_key_input():
+            return self.devices['keyboard']['device'].getKey()
+
+        key_input = get_key_input()
         while key_input > 0:
             if key_input == Keyboard.UP:
                 pitch_disturbance = 2.0
@@ -55,6 +58,6 @@ class KeyboardControlledDrone(IDrone, abc.ABC):
                 roll_disturbance = -1.0
             elif key_input == Keyboard.SHIFT + Keyboard.LEFT:
                 roll_disturbance = 1.0
-            key_input = self.keyboard.getKey()
+            key_input = get_key_input()
 
         return roll_disturbance, pitch_disturbance, yaw_disturbance

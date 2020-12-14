@@ -1,121 +1,58 @@
-from typing import List
-
 from flockai.models.drones.keyboard_controller_drone import KeyboardControlledDrone
 from flockai.utils.string_generator import StringGenerator
-from controller import InertialUnit, Camera, LED, Emitter, Receiver, GPS, Compass, Gyro, Motor
-
+from flockai.models.devices.device_enums import EnableableDevice, NonEnableableDevice, MotorDevice
 
 class KeyboardMavic2DJI(KeyboardControlledDrone):
     """
     A Keyboard Controlled Mavic2DJI
     """
-    def __init__(self):
-        super().__init__()
-        self._initialize()
+    def __init__(self, en_devices, nen_devices, motor_devices):
+        super().__init__(en_devices, nen_devices, motor_devices)
 
-    def _initialize(self):
-        """
-        Initialization step
-        :return:
-        """
-        self.name = self.getName()
-        self.basic_time_step = int(self.getBasicTimeStep())
-        self._attach_and_enable_devices()
-        self._attach_and_enable_motors()
-        self.keyboard.enable(self.basic_time_step)
-        self.batterySensorEnable(self.basic_time_step)
 
-    def _attach_and_enable_devices(self):
-        """
-        Define all the required devices and enable them
-        :return:
-        """
-        self.emitter: Emitter = self.getEmitter("emitter")
-
-        self.receiver: Receiver = self.getReceiver("receiver")
-        self.receiver.enable(self.basic_time_step)
-
-        self.camera: Camera = self.getCamera("camera")
-        self.camera.enable(self.basic_time_step)
-
-        self.front_left_led: LED = self.getLED("front left led")
-        self.front_right_led: LED = self.getLED("front right led")
-
-        self.imu: InertialUnit = self.getInertialUnit("inertial unit")
-        self.imu.enable(self.basic_time_step)
-
-        self.gps: GPS = self.getGPS("gps")
-        self.gps.enable(self.basic_time_step)
-
-        self.compass: Compass = self.getCompass("compass")
-        self.compass.enable(self.basic_time_step)
-
-        self.gyro: Gyro = self.getGyro("gyro")
-        self.gyro.enable(self.basic_time_step)
-
-    def _attach_and_enable_motors(self):
-        """
-        Define all the required motors and enable them
-        :return:
-        """
-        # Camera angle motors
-        self.camera_roll_motor = self.getMotor("camera roll")
-        self.camera_pitch_motor = self.getMotor("camera pitch")
-        self.camera_yaw_motor = self.getMotor("camera yaw")
-
-        # Propellers
-        self.front_left_motor = self.getMotor("front left propeller")
-        self.front_right_motor = self.getMotor("front right propeller")
-        self.rear_left_motor = self.getMotor("rear left propeller")
-        self.rear_right_motor = self.getMotor("rear right propeller")
-
-        # Set position & velocity for propellers
-        propellers: List[Motor] = [
-            self.front_left_motor,
-            self.front_right_motor,
-            self.rear_left_motor,
-            self.rear_right_motor
-        ]
-
-        for propeller in propellers:
-            propeller.setPosition(float('inf'))
-            propeller.setVelocity(1.0)
-
-    def send_msg(self, msg):
+    def send_msg(self, msg, emitter_devices: list):
         """
         Sends a message from the attached emitter device
+        :param emitter_devices: The emitter devices to send the message
         :param msg: The message to send
         :return: None
         """
-        if self.emitter is None:
-            print("There is not emitter device attached")
+        for emitter in emitter_devices:
+            if emitter not in self.devices:
+                print(f"The specified emitter device is not found: {emitter}")
+                return
+            f_emitter = self.devices[emitter]['device']
+            f_emitter.send(msg.encode('utf-8'))
 
-        # print(f'{self.name}: I am sending {message}')
-        self.emitter.send(msg.encode('utf-8'))
-
-    def receive_msgs(self):
+    def receive_msgs(self, receiver_devices: list):
         """
         Receive messages on the receiver device
+        :param receiver_devices: The receiver device name as a string
         :return: None
         """
-        if self.receiver is None:
-            print("There is no receiver device attached")
-            return
+        for receiver in receiver_devices:
+            if receiver not in self.devices:
+                print(f"The specified receiver device is not found: {receiver}")
+                return
 
-        while self.receiver.getQueueLength() > 0:
-            message_received = self.receiver.getData().decode('utf-8')
-            # print(f'{self.name}: I have received this message {message_received}')
-            self.receiver.nextPacket()
+            f_receiver = self.devices[receiver]['device']
+            while f_receiver.getQueueLength() > 0:
+                message_received = f_receiver.getData().decode('utf-8')
+                f_receiver.nextPacket()
+                yield message_received
 
-    def blink_led_lights(self, time):
+    def blink_led_lights(self, led_devices: list):
         """
         Blink led lights every 2 seconds
         :param time: The simulation time. ie self.getTime()
         :return:
         """
-        led_on = (time // 1) % 2 == 1
-        self.front_left_led.set(led_on)
-        self.front_right_led.set(not led_on)
+        f_led_devices = [self.devices[led]['device'] for led in led_devices]
+        led_on = (self.getTime() // 1) % 2 == 1
+
+        for f_led in f_led_devices:
+            f_led.set(led_on)
+            led_on = not led_on
 
     def run(self):
         # Wait a second before starting
@@ -123,45 +60,28 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
             if self.getTime() > 1:
                 break
 
-        while self.step(self.basic_time_step) != -1:
-            time = self.getTime()
+        led_devices = []
+        emitter_devices = []
+        receiver_devices = []
+        for device_name in self.devices:
+            if self.devices[device_name]['type'] == NonEnableableDevice.LED:
+                led_devices.append(device_name)
+            if self.devices[device_name]['type'] == NonEnableableDevice.EMITTER:
+                emitter_devices.append(device_name)
+            if self.devices[device_name]['type'] == EnableableDevice.RECEIVER:
+                receiver_devices.append(device_name)
 
+        while self.step(self.basic_time_step) != -1:
             # Blink lights
-            self.blink_led_lights(time)
+            self.blink_led_lights(led_devices)
             # Fly drone
             self.actuate()
 
             # Get battery data
             # print(self.batterySensorGetValue())
 
-            # Retrieve image data
-            # self.save_image_every_sec(time, 2)
-
             # Send messages
-            self.send_msg(StringGenerator.get_random_message(4))
+            self.send_msg(StringGenerator.get_random_message(4), emitter_devices)
+
             # Receive messages
-            self.receive_msgs()
-
-
-
-    # def save_image_every_sec(self, time, sec):
-    #     """
-    #     Saves images every X seconds
-    #     :param time: The simulation time
-    #     :param sec: The timestep in seconds
-    #     :return:
-    #     """
-    #     config = SimulationConfig()
-    #     if config.simulation_enabled:
-    #         save_image = (time // 1) % sec == 1
-    #         if save_image:
-    #             self.camera.saveImage(f"{config.get_simulation_image_directory()}test_{time}.png", 50)  # quality in range [1, 100]
-    #     else:
-    #         print("Note: Data collection is not enabled")
-
-    # @classmethod
-    # def enable_data_collection(cls):
-    #     config = SimulationConfig()
-    #     config.simulation_enabled = True
-    #     print("Running Simulation: ", config.get_simulation_id())
-    #     config.create_simulation_image_directory()
+            received_messages = self.receive_msgs(receiver_devices)
