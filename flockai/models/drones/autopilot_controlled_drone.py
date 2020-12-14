@@ -17,4 +17,9 @@ class AutopilotControlledDrone(IDrone, abc.ABC):
         pass
 
     def get_input(self):
-        pass
+        # Transform the keyboard input to disturbances on the stabilization algorithm.
+        roll_disturbance = 0
+        pitch_disturbance = 2
+        yaw_disturbance = 0
+
+        return roll_disturbance, pitch_disturbance, yaw_disturbance

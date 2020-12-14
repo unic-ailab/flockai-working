@@ -1,14 +1,16 @@
+from flockai.models.drones.autopilot_controlled_drone import AutopilotControlledDrone
 from flockai.models.drones.keyboard_controller_drone import KeyboardControlledDrone
 from flockai.utils.string_generator import StringGenerator
 from flockai.models.devices.device_enums import EnableableDevice, NonEnableableDevice, MotorDevice
+
 
 class KeyboardMavic2DJI(KeyboardControlledDrone):
     """
     A Keyboard Controlled Mavic2DJI
     """
+
     def __init__(self, en_devices, nen_devices, motor_devices):
         super().__init__(en_devices, nen_devices, motor_devices)
-
 
     def send_msg(self, msg, emitter_devices: list):
         """
@@ -85,3 +87,18 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
             # Receive messages
             received_messages = self.receive_msgs(receiver_devices)
+
+
+class AutopilotMavic2DJI(AutopilotControlledDrone):
+    def __init__(self, en_devices, nen_devices, motor_devices):
+        super().__init__(en_devices, nen_devices, motor_devices)
+
+    def run(self):
+        # Wait a second before starting
+        while self.step(self.basic_time_step) != -1:
+            if self.getTime() > 1:
+                break
+
+        while self.step(self.basic_time_step) != -1:
+            # For now just actuate
+            self.actuate()
