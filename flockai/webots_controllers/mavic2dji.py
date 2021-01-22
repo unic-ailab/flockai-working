@@ -2,15 +2,21 @@ from flockai.models.drones.autopilot_controlled_drone import AutopilotControlled
 from flockai.models.drones.keyboard_controller_drone import KeyboardControlledDrone
 from flockai.utils.string_generator import StringGenerator
 from flockai.models.devices.device_enums import EnableableDevice, NonEnableableDevice, MotorDevice
-
+from flockai.utils.intensive_thread import IntensiveThread
 
 class KeyboardMavic2DJI(KeyboardControlledDrone):
     """
     A Keyboard Controlled Mavic2DJI
     """
 
-    def __init__(self, devices):
+    def __init__(self, devices, probes=None):
         super().__init__(devices)
+        self.probes = probes
+
+    def _activate_probes(self):
+        if self.probes:
+            for probe in self.probes:
+                probe.activate()
 
     def send_msg(self, msg, emitter_devices: list):
         """
@@ -73,6 +79,8 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
             if self.devices[device_name]['type'] == EnableableDevice.RECEIVER:
                 receiver_devices.append(device_name)
 
+        self._activate_probes()
+
         while self.step(self.basic_time_step) != -1:
             # Blink lights
             self.blink_led_lights(led_devices)
@@ -82,6 +90,10 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
             # Get battery data
             # print(self.batterySensorGetValue())
 
+            # Do an intensive task
+            t = IntensiveThread()
+            t.run()
+
             # Send messages
             self.send_msg(StringGenerator.get_random_message(4), emitter_devices)
 
@@ -90,8 +102,8 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
 
 class AutopilotMavic2DJI(AutopilotControlledDrone):
-    def __init__(self, en_devices, nen_devices, motor_devices):
-        super().__init__(en_devices, nen_devices, motor_devices)
+    def __init__(self, devices):
+        super().__init__(devices)
 
     def run(self):
         # Wait a second before starting

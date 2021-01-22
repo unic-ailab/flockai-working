@@ -4,6 +4,9 @@ from flockai.interfaces.drone import IDrone
 
 
 class AutopilotControlledDrone(IDrone, abc.ABC):
+    def __init__(self, devices):
+        super().__init__(devices)
+
     def set_flight_plan(self, plan):
         pass
 
