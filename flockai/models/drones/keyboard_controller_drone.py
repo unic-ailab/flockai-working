@@ -8,8 +8,8 @@ class KeyboardControlledDrone(IDrone, abc.ABC):
     Defines a drone which can be controlled with keyboard controls
     """
 
-    def __init__(self, en_devices, nen_devices, motor_devices):
-        super().__init__(en_devices, nen_devices, motor_devices)
+    def __init__(self, devices):
+        super().__init__(devices)
 
     @classmethod
     def display_controls(cls):

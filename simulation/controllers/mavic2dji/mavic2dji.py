@@ -1,9 +1,8 @@
 from flockai.webots_controllers.mavic2dji import KeyboardMavic2DJI
 from flockai.models.devices.device_enums import EnableableDevice, NonEnableableDevice, MotorDevice, AircraftAxis, \
-    Relative2DPosition
+    Relative2DPosition, Devices
 
 enableable_devices = [
-
     (EnableableDevice.RECEIVER, "receiver"),
     (EnableableDevice.CAMERA, "camera"),
     (EnableableDevice.KEYBOARD, None),
@@ -30,7 +29,9 @@ motor_devices = [
     (MotorDevice.PROPELLER, "rear right propeller", Relative2DPosition(-1, 1)),
 ]
 
+devices = Devices(enableable_devices, non_enableable_devices, motor_devices)
+
 # Create drone instance and run its controller
-controller = KeyboardMavic2DJI(enableable_devices, non_enableable_devices, motor_devices)
+controller = KeyboardMavic2DJI(devices)
 
 controller.run()

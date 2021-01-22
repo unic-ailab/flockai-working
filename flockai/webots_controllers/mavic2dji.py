@@ -9,8 +9,8 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
     A Keyboard Controlled Mavic2DJI
     """
 
-    def __init__(self, en_devices, nen_devices, motor_devices):
-        super().__init__(en_devices, nen_devices, motor_devices)
+    def __init__(self, devices):
+        super().__init__(devices)
 
     def send_msg(self, msg, emitter_devices: list):
         """

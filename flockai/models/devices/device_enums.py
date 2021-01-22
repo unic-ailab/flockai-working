@@ -1,6 +1,13 @@
 from enum import IntEnum, auto
 
 
+class Devices:
+    def __init__(self, enableable_devices, non_enableable_devices, motor_devices):
+        self.enableable_devices = enableable_devices
+        self.non_enableable_devices = non_enableable_devices
+        self.motor_devices = motor_devices
+
+
 class EnableableDevice(IntEnum):
     RECEIVER = 0
     CAMERA = auto()

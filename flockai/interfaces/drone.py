@@ -12,31 +12,16 @@ class IDrone(IRobot, abc.ABC):
     Define all actions needed for flying a drone and declare the get_input() abstract method
     """
 
-    def __init__(self, en_devices, nen_devices, motor_devices):
+    def __init__(self, devices):
         super().__init__()
         self.name = self.getName()
         self.basic_time_step = int(self.getBasicTimeStep())
-        self.devices = self._attach_and_enable_devices(en_devices, nen_devices)
-        self.motors = self._attach_and_enable_motors(motor_devices)
+        self.devices = self._attach_and_enable_devices(devices.enableable_devices, devices.non_enableable_devices)
+        self.motors = self._attach_and_enable_motors(devices.motor_devices)
         self._cross_check_devices()
         self._cross_check_motors()
         self._set_constants()
         self._set_variables()
-
-    def _get_device(self, key, name):
-        device_retriever = {
-            EnableableDevice.RECEIVER: self.getReceiver,
-            EnableableDevice.CAMERA: self.getCamera,
-            EnableableDevice.INERTIAL_UNIT: self.getInertialUnit,
-            EnableableDevice.GPS: self.getGPS,
-            EnableableDevice.COMPASS: self.getCompass,
-            EnableableDevice.GYRO: self.getGyro,
-            MotorDevice.CAMERA: self.getMotor,
-            MotorDevice.PROPELLER: self.getMotor,
-            NonEnableableDevice.LED: self.getLED,
-            NonEnableableDevice.EMITTER: self.getEmitter,
-        }
-        return device_retriever[key](name)
 
     def _attach_and_enable_devices(self, en_devices, nen_devices):
         """
@@ -51,13 +36,13 @@ class IDrone(IRobot, abc.ABC):
             elif EnableableDevice(device) == EnableableDevice.BATTERY_SENSOR:
                 self.batterySensorEnable(self.basic_time_step)
             elif name is not None:
-                e_devices[name] = {'type': device, 'device': self._get_device(device, name)}
+                e_devices[name] = {'type': device, 'device': self.getDevice(name)}
                 e_devices[name]['device'].enable(self.basic_time_step)
 
         ne_devices = {}
         for device, name in nen_devices:
             if name is not None:
-                ne_devices[name] = {'type': device, 'device': self._get_device(device, name)}
+                ne_devices[name] = {'type': device, 'device': self.getDevice(name)}
 
         return {**e_devices, **ne_devices}
 
@@ -69,9 +54,9 @@ class IDrone(IRobot, abc.ABC):
         m_devices = {}
         for device, name, *args in motor_devices:
             if MotorDevice(device) == MotorDevice.CAMERA:
-                m_devices[name] = {'type': device, 'motor': self._get_device(device, name), 'axis': args[0]}
+                m_devices[name] = {'type': device, 'motor': self.getDevice(name), 'axis': args[0]}
             elif MotorDevice(device) == MotorDevice.PROPELLER:
-                m_devices[name] = {'type': device, 'motor': self._get_device(device, name),
+                m_devices[name] = {'type': device, 'motor': self.getDevice(name),
                                    'relative_position': args[0]}
                 m_devices[name]['motor'].setPosition(float('inf'))
                 m_devices[name]['motor'].setVelocity(1.0)
