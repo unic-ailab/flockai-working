@@ -33,15 +33,9 @@ motor_devices = [
 
 devices = Devices(enableable_devices, non_enableable_devices, motor_devices)
 p1 = ExampleProbe()
-p1.set_debugmode(True)
-p1.set_logging()
-
-p2 = ProcessProbe()
-p2.set_debugmode(True)
-p2.set_logging()
-
-probes = [p1, p2]
-
+probes = {
+    'cpu': ProcessProbe()
+}
 # Create drone instance and run its controller
 controller = KeyboardMavic2DJI(devices=devices, probes=probes)
 

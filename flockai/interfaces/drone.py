@@ -4,6 +4,7 @@ import math
 
 from flockai.models.devices.device_enums import EnableableDevice, MotorDevice, AircraftAxis, Relative2DPosition, \
     NonEnableableDevice
+from flockai.models.energy.energy import Energy
 from flockai.utils.graphics import Graphics
 
 
@@ -15,6 +16,7 @@ class IDrone(IRobot, abc.ABC):
     def __init__(self, devices):
         super().__init__()
         self.name = self.getName()
+        self.energy_model = Energy()
         self.basic_time_step = int(self.getBasicTimeStep())
         self.devices = self._attach_and_enable_devices(devices.enableable_devices, devices.non_enableable_devices)
         self.motors = self._attach_and_enable_motors(devices.motor_devices)
@@ -163,6 +165,15 @@ class IDrone(IRobot, abc.ABC):
         self.K_PITCH_P = 30.0  # P constant of the pitch PID
         self.K_YAW_P = 20.0  # P constant of the yaw PID
 
+        self.energy_model.processing_energy.set(p_active=self.RASPBERRY_PI_4B_ACTIVE,
+                                                p_io=self.RASPBERRY_PI_4B_IDLE,
+                                                p_idle=self.RASPBERRY_PI_4B_IDLE,
+                                                p_peripheral=0)
+
+        self.energy_model.communication_energy.set(p_transmit=self.P_COMM,
+                                                   p_receive=self.P_COMM,
+                                                   p_idle=self.P_COMM / 2)
+
     def actuate(self):
         """
         Fly the drone by stabilizing it based on camera motor sensors and input
@@ -194,7 +205,6 @@ class IDrone(IRobot, abc.ABC):
         rear_left_motor_input = self.K_VERTICAL_THRUST + vertical_input - roll_input + pitch_input - yaw_input
         rear_right_motor_input = self.K_VERTICAL_THRUST + vertical_input + roll_input + pitch_input + yaw_input
 
-        # print(front_left_motor_input, front_right_motor_input, rear_left_motor_input, rear_right_motor_input)
         self.front_left_motor.setVelocity(front_left_motor_input)
         self.front_right_motor.setVelocity(-front_right_motor_input)
         self.rear_left_motor.setVelocity(-rear_left_motor_input)
