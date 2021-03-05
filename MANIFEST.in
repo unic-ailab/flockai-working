@@ -1,0 +1,2 @@
+include flockai/data/*.txt
+include flockai/webot_controllers/*.sav
