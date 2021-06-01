@@ -134,6 +134,8 @@ dmypy.json
 # Image data
 simulation/simulations/images/*
 !simulation/simulations/images/.gitkeep
+simulation/controllers/mavic2dji_cnn/logs/Images/*
+!simulation/controllers/mavic2dji_cnn/logs/Images/.gitkeep
 
 # Running simulations
 simulation/worlds/.*
