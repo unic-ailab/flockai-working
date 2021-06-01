@@ -3,6 +3,7 @@ from PIL import Image
 import numpy as np
 from dlib import cnn_face_detection_model_v1
 
+from controller import Camera
 from flockai.PyCatascopia.Metrics import *
 from flockai.interfaces.flockai_ml import FlockAIClassifier
 from flockai.models.probes.flockai_probe import FlockAIProbe, ProcessCpuUtilizationMetric, ProcessCpuTimeMetric, ProcessIOTimeMetric, \
@@ -10,7 +11,6 @@ from flockai.models.probes.flockai_probe import FlockAIProbe, ProcessCpuUtilizat
 from flockai.webots_controllers.mavic2dji import KeyboardMavic2DJI
 from flockai.models.devices.device_enums import EnableableDevice, NonEnableableDevice, MotorDevice, AircraftAxis, \
     Relative2DPosition, Devices
-
 
 """""""""""""""""""""
 DECLARE DEVICES HERE
@@ -32,7 +32,6 @@ non_enableable_devices = [
     (NonEnableableDevice.LED, "front right led"),
     (NonEnableableDevice.DISTANCE_SENSOR, "ds0")
 ]
-
 """""""""""""""""""""
 DECLARE MOTORS HERE
 """""""""""""""""""""
@@ -45,15 +44,11 @@ motor_devices = [
     (MotorDevice.PROPELLER, "rear left propeller", Relative2DPosition(-1, -1)),
     (MotorDevice.PROPELLER, "rear right propeller", Relative2DPosition(-1, 1)),
 ]
-
 devices = Devices(enableable_devices, non_enableable_devices, motor_devices)
 
 """""""""""""""""""""""""""
 CREATE MONITORING PROBES
 """""""""""""""""""""""""""
-# 1. Create a probe interface where the use defines what metrics he wants to use
-# 2. Based on the probes that the user wants to use flockai should behave accordingly
-
 metrics = [
     ProcessCpuUtilizationMetric(name='cpu_pct', units='%', desc='process-level cpu utilization', minVal=0, higherIsBetter=False),
     ProcessCpuTimeMetric('cpu_time', 's', 'process-level cpu time', minVal=0, higherIsBetter=False),
@@ -69,30 +64,42 @@ INITIALIZE THE CONTROLLER
 """""""""""""""""""""""""""""
 controller = KeyboardMavic2DJI(devices=devices, probe=probe)
 
-
+"""""""""""""""""""""""""""""""""""
+IMPLEMENT THE FLOCKAI CLASSIFIER
+"""""""""""""""""""""""""""""""""""
 class FaceDetectionClassifier(FlockAIClassifier):
-    """
-    IMPLEMENT A FLOCKAI CLASSIFIER
-    """
     def __init__(self):
         super().__init__()
-        self.periodicity = 5
-        self.onboard = True
+        # REQUIRED ATTRIBUTES
+        self.periodicity = 5  # defines the periodicity of the prediction
+        self.onboard = True  # defines if the classifier is run on the drone, if False, the drone transmits the input data via its emitter device
         self._load_model()
 
     """ IMPLEMENT ABSTRACT METHODS"""
     def _load_model(self):
+        """
+        Custom method that implements the way a model is loaded
+        :return:
+        """
         filename = 'cnnFaceRecognition.bin'
         self.model = pickle.load(open(filename, 'rb'))
         self.cnn_face_detector = cnn_face_detection_model_v1(self.model)
 
     def _get_model_input(self):
+        """
+        Custom method that access the camera on the controller and captures images
+        :return:
+        """
         filename = f'logs/Images/image_{str(int(time.time()))}.jpg'
-        camera = controller.devices['camera']['device']  # get access to controller devices
+        camera: Camera = controller.devices['camera']['device']  # get access to controller devices
         camera.saveImage(filename, 20)
         return filename
 
     def predict(self):
+        """
+        Main pipeline method used by FlockAI during the simulation to make predictions
+        :return:
+        """
         if controller.getTime() % self.periodicity != 0.0:  # get access to controller functions
             return None
 
@@ -101,6 +108,21 @@ class FaceDetectionClassifier(FlockAIClassifier):
         return [self._trim_css_to_bounds(self._rect_to_css(face.rect), image.shape) for face in self.cnn_face_detector(image, 1)]
 
     """ IMPLEMENT CUSTOM METHODS """
+    def _get_foo_unused_input(self):
+        """
+        Unused method showcasing a different input method that the user needs
+        :return:
+        """
+        camera: Camera = controller.devices['camera']['device']
+        image = camera.getImage()
+        width = camera.getWidth()
+        height = camera.getHeight()
+
+        image_vector = [[[camera.imageGetRed(image, width, x, y),
+                         camera.imageGetGreen(image, width, x, y),
+                         camera.imageGetBlue(image, width, x, y)] for y in range(height)] for x in range(width)]
+        return image_vector
+
     def _trim_css_to_bounds(self, css, image_shape):
         return max(css[0], 0), min(css[1], image_shape[1]), min(css[2], image_shape[0]), max(css[3], 0)
 

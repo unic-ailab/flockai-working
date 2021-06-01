@@ -22,10 +22,6 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
     """
 
     def __init__(self, devices, probe: FlockAIProbe=None, model=None):
-        self.P_COMM = 8.4
-        self.DJI_A3_FC = 8
-        self.RASPBERRY_PI_4B_IDLE = 4
-        self.RASPBERRY_PI_4B_ACTIVE = 8
         super().__init__(devices)
         self.probe = probe
         self._activate_probes()
@@ -99,21 +95,6 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
             f_led.set(led_on)
             led_on = not led_on
 
-    def get_image_vector_every(self, n):
-        t = self.getTime() % n
-        if t != 0.0:
-            return []
-
-        camera: Camera = self.devices['camera']['device']
-        image = camera.getImage()
-        width = camera.getWidth()
-        height = camera.getHeight()
-
-        image_vector = [[[camera.imageGetRed(image, width, x, y),
-                         camera.imageGetGreen(image, width, x, y),
-                         camera.imageGetBlue(image, width, x, y)] for y in range(height)] for x in range(width)]
-        return image_vector
-
     def run(self):
         # Wait a second before starting
         while self.step(self.basic_time_step) != -1:
@@ -139,33 +120,21 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
         net_transaction_time = 0
 
         while self.step(self.basic_time_step) != -1:
-            # Blink lights
             self.blink_led_lights(led_devices)
-            # Fly drone
             self.actuate()
 
-            # Get battery data
-            # print(self.batterySensorGetValue())
+            # Drone sends data specified by the user to the base station if ML is not running on board
+            # TODO:
 
-            # Send messages
-            # image_rgb_vector = self.get_image_vector_every(5)
-            # transmit_time = self.send_msg(image_rgb_vector, emitter_devices)
-            # print("Transmit time:", transmit_time)
-
-            # Receive messages
-            # received_messages, receive_time = self.receive_msgs(receiver_devices)
-            # print("Receive time:", receive_time)
-
+            # Calculate energy values on each cycle
             flight_time = probe_alive_time.get_val()
             cpu_time = probe_cpu_time.get_val()
             t = probe_io_time.get_val()
             io_time = 0 if t is None else t
             idle_time = flight_time - (cpu_time + io_time)
-
             total_energy += flight_time * self.DJI_A3_FC
-            # print("Total energy consumed:", total_energy)
 
-            # get image in png format
+            # Execute prediction pipeline step
             if self.model is not None:
                 prediction = self.model.predict()
                 if prediction is not None:
@@ -174,15 +143,7 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
 class AutopilotMavic2DJI(AutopilotControlledDrone):
     def __init__(self, devices, probe: FlockAIProbe=None, model=None):
-        self.P_COMM = 8.4
-        self.DJI_A3_FC = 8
-        self.RASPBERRY_PI_4B_IDLE = 4
-        self.RASPBERRY_PI_4B_ACTIVE = 8
         super().__init__(devices)
-
-    def get_angular_velocity(self):
-        gyro: Gyro = self.devices['gyro']['device']
-        return gyro.getValues()
 
     def send_msg(self, msg, emitter_devices: list):
         """
@@ -199,7 +160,6 @@ class AutopilotMavic2DJI(AutopilotControlledDrone):
                 return 0
             f_emitter = self.devices[emitter]['device']
 
-
         return total_time
 
     def run(self):
@@ -215,6 +175,4 @@ class AutopilotMavic2DJI(AutopilotControlledDrone):
 
         while self.step(self.basic_time_step) != -1:
             # For now just actuate
-            # print(self.get_distance_from_target())
             self.actuate()
-            # self.get_input()

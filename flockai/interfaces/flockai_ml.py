@@ -10,7 +10,7 @@ class FlockAIClassifier(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def predict(self, *args, **kwargs):
+    def predict(self):
         raise NotImplementedError
 
     @abc.abstractmethod

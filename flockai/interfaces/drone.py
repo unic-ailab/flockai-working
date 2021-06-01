@@ -2,8 +2,7 @@ import abc
 from flockai.interfaces.robot import IRobot
 import math
 
-from flockai.models.devices.device_enums import EnableableDevice, MotorDevice, AircraftAxis, Relative2DPosition, \
-    NonEnableableDevice
+from flockai.models.devices.device_enums import EnableableDevice, MotorDevice, AircraftAxis, Relative2DPosition
 from flockai.models.energy.energy import Energy
 from flockai.utils.graphics import Graphics
 
@@ -15,6 +14,12 @@ class IDrone(IRobot, abc.ABC):
 
     def __init__(self, devices):
         super().__init__()
+        # DEFINE ENERGY CONSTANTS FIRST
+        self.P_COMM = 8.4
+        self.DJI_A3_FC = 8
+        self.RASPBERRY_PI_4B_IDLE = 4
+        self.RASPBERRY_PI_4B_ACTIVE = 8
+
         self.name = self.getName()
         self.energy_model = Energy()
         self.basic_time_step = int(self.getBasicTimeStep())
@@ -68,6 +73,10 @@ class IDrone(IRobot, abc.ABC):
         return m_devices
 
     def _cross_check_devices(self):
+        """
+        Cross checks devices, making sure all of the required ones have been registered by the user in order for the drone to fly
+        :return:
+        """
         required_devices = {
             EnableableDevice.INERTIAL_UNIT: True,
             EnableableDevice.GPS: True,
@@ -90,6 +99,10 @@ class IDrone(IRobot, abc.ABC):
                 raise NotImplementedError(f"The drone needs {EnableableDevice(key).name} device to operate")
 
     def _cross_check_motors(self):
+        """
+        Cross checks motors, making sure all of the required ones have been registered by the user in order for the drone to fly
+        :return:
+        """
         front_left = repr(Relative2DPosition(1, -1))
         front_right = repr(Relative2DPosition(1, 1))
         rear_left = repr(Relative2DPosition(-1, -1))
