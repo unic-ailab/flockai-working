@@ -1,8 +1,8 @@
 import abc
 from pathlib import Path
 
-class ISensor(metaclass=abc.ABCMeta):
 
+class ISensor(metaclass=abc.ABCMeta):
     def __init__(self, file):
         self._set_data_file(file)
         self.data_entry = 0
@@ -18,8 +18,7 @@ class ISensor(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     def _set_data_file(self, file):
-        file_path = Path(__file__).parent.parent / file
-        with open(file_path, 'r') as f:
+        with open(file, 'r') as f:
             self.data = [line[:-1] for line in f.readlines()]
 
 

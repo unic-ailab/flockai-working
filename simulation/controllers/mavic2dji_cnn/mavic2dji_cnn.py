@@ -1,17 +1,15 @@
-import abc
 import pickle
-
 from PIL import Image
 import numpy as np
 from dlib import cnn_face_detection_model_v1
 
 from flockai.PyCatascopia.Metrics import *
+from flockai.interfaces.flockai_ml import FlockAIClassifier
 from flockai.models.probes.flockai_probe import FlockAIProbe, ProcessCpuUtilizationMetric, ProcessCpuTimeMetric, ProcessIOTimeMetric, \
     ProcessAliveTimeMetric, ProbeAliveTimeMetric, ProcessMemoryMetric
 from flockai.webots_controllers.mavic2dji import KeyboardMavic2DJI
 from flockai.models.devices.device_enums import EnableableDevice, NonEnableableDevice, MotorDevice, AircraftAxis, \
     Relative2DPosition, Devices
-
 
 
 """""""""""""""""""""
@@ -66,48 +64,43 @@ metrics = [
 ]
 probe = FlockAIProbe(metrics, name='Example Probe', periodicity=5)
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""
-LOAD A MACHINE LEARNING MODEL AND SET THE INPUTS
-"""""""""""""""""""""""""""""""""""""""""""""""""""
-# 1. Create a model interface where the user defines the model:
-#   a. filename
-#   b. library functions to load and predict
-#   c. input vector sizes and which data
-# filename = 'LinReg_model.sav'
-# filename = 'cnnFaceRecognition.bin'
-# model = pickle.load(open(filename, 'rb'))
-
-
-class FlockAIClassifier(abc.ABC):
-    def __init__(self):
-        self.model = None
-
-    @abc.abstractmethod
-    def load_model(self):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def predict(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def set_input(self):
-        raise NotImplementedError
+"""""""""""""""""""""""""""""
+INITIALIZE THE CONTROLLER
+"""""""""""""""""""""""""""""
+controller = KeyboardMavic2DJI(devices=devices, probe=probe)
 
 
 class FaceDetectionClassifier(FlockAIClassifier):
-    def load_model(self):
+    """
+    IMPLEMENT A FLOCKAI CLASSIFIER
+    """
+    def __init__(self):
+        super().__init__()
+        self.periodicity = 5
+        self.onboard = True
+        self._load_model()
+
+    """ IMPLEMENT ABSTRACT METHODS"""
+    def _load_model(self):
         filename = 'cnnFaceRecognition.bin'
         self.model = pickle.load(open(filename, 'rb'))
         self.cnn_face_detector = cnn_face_detection_model_v1(self.model)
 
-    def predict(self, image_filename):
+    def _get_model_input(self):
+        filename = f'logs/Images/image_{str(int(time.time()))}.jpg'
+        camera = controller.devices['camera']['device']  # get access to controller devices
+        camera.saveImage(filename, 20)
+        return filename
+
+    def predict(self):
+        if controller.getTime() % self.periodicity != 0.0:  # get access to controller functions
+            return None
+
+        image_filename = self._get_model_input()
         image = self._load_image_file(image_filename)
-        print([self._trim_css_to_bounds(self._rect_to_css(face.rect), image.shape) for face in self.cnn_face_detector(image, 1)])
+        return [self._trim_css_to_bounds(self._rect_to_css(face.rect), image.shape) for face in self.cnn_face_detector(image, 1)]
 
-    def set_input(self):
-        pass
-
+    """ IMPLEMENT CUSTOM METHODS """
     def _trim_css_to_bounds(self, css, image_shape):
         return max(css[0], 0), min(css[1], image_shape[1]), min(css[2], image_shape[0]), max(css[3], 0)
 
@@ -121,11 +114,8 @@ class FaceDetectionClassifier(FlockAIClassifier):
         return np.array(im)
 
 
-model = FaceDetectionClassifier()
-model.load_model()
-"""""""""""""""""""""""""""""
-START AND RUN THE CONTROLLER
-"""""""""""""""""""""""""""""
-controller = KeyboardMavic2DJI(devices=devices, probe=probe, model=model)
-
+"""""""""""""""""""""""""""""""""""""""""""""
+SET THE ML MODEL ON THE CONTROLLER AND RUN IT
+"""""""""""""""""""""""""""""""""""""""""""""
+controller.model = FaceDetectionClassifier()
 controller.run()

@@ -114,19 +114,6 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
                          camera.imageGetBlue(image, width, x, y)] for y in range(height)] for x in range(width)]
         return image_vector
 
-    def get_image_file_every(self, n):
-        t = self.getTime() % n
-        if t != 0.0:
-            return ''
-
-        filename = f'logs/Images/image_{str(int(time.time()))}.jpg'
-        camera: Camera = self.devices['camera']['device']
-        camera.saveImage(filename, 20)
-
-        return filename
-
-
-
     def run(self):
         # Wait a second before starting
         while self.step(self.basic_time_step) != -1:
@@ -150,10 +137,6 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
         total_energy = 0
         net_transaction_time = 0
-        temperature_sensor = TemperatureSensor('data/temperature_data.txt')
-        humidity_sensor = HumiditySensor('data/humidity_data.txt')
-
-        # cnn_face_detector = cnn_face_detection_model_v1(self.model)
 
         while self.step(self.basic_time_step) != -1:
             # Blink lights
@@ -163,10 +146,6 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
             # Get battery data
             # print(self.batterySensorGetValue())
-
-            # Do an intensive task
-            # t = IntensiveThread()
-            # t.run()
 
             # Send messages
             # image_rgb_vector = self.get_image_vector_every(5)
@@ -186,19 +165,11 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
             total_energy += flight_time * self.DJI_A3_FC
             # print("Total energy consumed:", total_energy)
 
-            humidity_max, humidity_min, humidity_avg = humidity_sensor.get_values()
-            temperature_max, temperature_min, temperature_avg = temperature_sensor.get_values()
-
-            input_vector = np.array([[temperature_max], [temperature_min], [temperature_avg],
-                                     [humidity_max], [humidity_min], [humidity_avg]]).reshape(1, -1)
-
             # get image in png format
-            image_filename = self.get_image_file_every(5)
-            if image_filename != '':
-                self.model.predict(image_filename)
-                # image = self.load_image_file(image_filename)
-                # print([self._trim_css_to_bounds(self._rect_to_css(face.rect), image.shape) for face in cnn_face_detector(image, 1)])
-            # print(self.model.predict(input_vector))
+            if self.model is not None:
+                prediction = self.model.predict()
+                if prediction is not None:
+                    print(prediction)
 
 
 class AutopilotMavic2DJI(AutopilotControlledDrone):
