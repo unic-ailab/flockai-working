@@ -17,11 +17,14 @@ class EnableableDevice(IntEnum):
     COMPASS = auto()
     INERTIAL_UNIT = auto()
     GYRO = auto()
+    RADAR = auto()
+    DISTANCE_SENSOR = auto()
 
 
 class NonEnableableDevice(IntEnum):
     LED = 100
     EMITTER = auto()
+    DISTANCE_SENSOR = auto()
 
 
 class MotorDevice(IntEnum):

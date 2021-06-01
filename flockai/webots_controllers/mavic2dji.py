@@ -1,3 +1,7 @@
+from PIL import Image
+from dlib import cnn_face_detection_model_v1
+
+from controller import Emitter, Camera, GPS, Gyro
 from flockai.PyCatascopia.probelib.ProcessProbe import ProcessProbe
 from flockai.models.drones.autopilot_controlled_drone import AutopilotControlledDrone
 from flockai.models.drones.keyboard_controller_drone import KeyboardControlledDrone
@@ -8,6 +12,8 @@ from flockai.utils.string_generator import StringGenerator
 from flockai.models.devices.device_enums import EnableableDevice, NonEnableableDevice, MotorDevice
 from flockai.utils.intensive_thread import IntensiveThread
 import numpy as np
+import json
+import time
 
 
 class KeyboardMavic2DJI(KeyboardControlledDrone):
@@ -37,7 +43,6 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
         :param msg: The message to send
         :return: None
         """
-
         total_time = 0
         probe_alive_time = self.probe.get_metric('ProbeAliveTimeMetric')
 
@@ -47,7 +52,9 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
                 return 0
             f_emitter = self.devices[emitter]['device']
             t1 = probe_alive_time.get_val()
-            f_emitter.send(msg.encode('utf-8'))
+            message = json.dumps(msg)
+            f_emitter.send(message.encode('utf-8'))
+
             t2 = probe_alive_time.get_val()
             total_time += t2 - t1
 
@@ -92,6 +99,34 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
             f_led.set(led_on)
             led_on = not led_on
 
+    def get_image_vector_every(self, n):
+        t = self.getTime() % n
+        if t != 0.0:
+            return []
+
+        camera: Camera = self.devices['camera']['device']
+        image = camera.getImage()
+        width = camera.getWidth()
+        height = camera.getHeight()
+
+        image_vector = [[[camera.imageGetRed(image, width, x, y),
+                         camera.imageGetGreen(image, width, x, y),
+                         camera.imageGetBlue(image, width, x, y)] for y in range(height)] for x in range(width)]
+        return image_vector
+
+    def get_image_file_every(self, n):
+        t = self.getTime() % n
+        if t != 0.0:
+            return ''
+
+        filename = f'logs/Images/image_{str(int(time.time()))}.jpg'
+        camera: Camera = self.devices['camera']['device']
+        camera.saveImage(filename, 20)
+
+        return filename
+
+
+
     def run(self):
         # Wait a second before starting
         while self.step(self.basic_time_step) != -1:
@@ -118,6 +153,8 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
         temperature_sensor = TemperatureSensor('data/temperature_data.txt')
         humidity_sensor = HumiditySensor('data/humidity_data.txt')
 
+        # cnn_face_detector = cnn_face_detection_model_v1(self.model)
+
         while self.step(self.basic_time_step) != -1:
             # Blink lights
             self.blink_led_lights(led_devices)
@@ -132,11 +169,12 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
             # t.run()
 
             # Send messages
-            transmit_time = self.send_msg(StringGenerator.get_random_message(100), emitter_devices)
+            # image_rgb_vector = self.get_image_vector_every(5)
+            # transmit_time = self.send_msg(image_rgb_vector, emitter_devices)
             # print("Transmit time:", transmit_time)
 
             # Receive messages
-            received_messages, receive_time = self.receive_msgs(receiver_devices)
+            # received_messages, receive_time = self.receive_msgs(receiver_devices)
             # print("Receive time:", receive_time)
 
             flight_time = probe_alive_time.get_val()
@@ -153,11 +191,45 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
             input_vector = np.array([[temperature_max], [temperature_min], [temperature_avg],
                                      [humidity_max], [humidity_min], [humidity_avg]]).reshape(1, -1)
-            print(self.model.predict(input_vector))
+
+            # get image in png format
+            image_filename = self.get_image_file_every(5)
+            if image_filename != '':
+                self.model.predict(image_filename)
+                # image = self.load_image_file(image_filename)
+                # print([self._trim_css_to_bounds(self._rect_to_css(face.rect), image.shape) for face in cnn_face_detector(image, 1)])
+            # print(self.model.predict(input_vector))
+
 
 class AutopilotMavic2DJI(AutopilotControlledDrone):
-    def __init__(self, devices):
+    def __init__(self, devices, probe: FlockAIProbe=None, model=None):
+        self.P_COMM = 8.4
+        self.DJI_A3_FC = 8
+        self.RASPBERRY_PI_4B_IDLE = 4
+        self.RASPBERRY_PI_4B_ACTIVE = 8
         super().__init__(devices)
+
+    def get_angular_velocity(self):
+        gyro: Gyro = self.devices['gyro']['device']
+        return gyro.getValues()
+
+    def send_msg(self, msg, emitter_devices: list):
+        """
+        Sends a message from the attached emitter device
+        :param emitter_devices: The emitter devices to send the message
+        :param msg: The message to send
+        :return: None
+        """
+        total_time = 0
+
+        for emitter in emitter_devices:
+            if emitter not in self.devices:
+                print(f"The specified emitter device is not found: {emitter}")
+                return 0
+            f_emitter = self.devices[emitter]['device']
+
+
+        return total_time
 
     def run(self):
         # Wait a second before starting
@@ -165,6 +237,13 @@ class AutopilotMavic2DJI(AutopilotControlledDrone):
             if self.getTime() > 1:
                 break
 
+        emitter_devices = []
+        for device_name in self.devices:
+            if self.devices[device_name]['type'] == NonEnableableDevice.EMITTER:
+                emitter_devices.append(device_name)
+
         while self.step(self.basic_time_step) != -1:
             # For now just actuate
+            # print(self.get_distance_from_target())
             self.actuate()
+            # self.get_input()

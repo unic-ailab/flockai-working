@@ -31,15 +31,17 @@ class IDrone(IRobot, abc.ABC):
         :return:
         """
         e_devices = {}
-        for device, name in en_devices:
+        for device, name, *sampling_period in en_devices:
+            time_step = self.basic_time_step if len(sampling_period) == 0 else sampling_period[0]
+
             if EnableableDevice(device) == EnableableDevice.KEYBOARD:
                 e_devices['keyboard'] = {'type': device, 'device': self.keyboard}
-                e_devices['keyboard']['device'].enable(self.basic_time_step)
+                e_devices['keyboard']['device'].enable(time_step)
             elif EnableableDevice(device) == EnableableDevice.BATTERY_SENSOR:
                 self.batterySensorEnable(self.basic_time_step)
             elif name is not None:
                 e_devices[name] = {'type': device, 'device': self.getDevice(name)}
-                e_devices[name]['device'].enable(self.basic_time_step)
+                e_devices[name]['device'].enable(time_step)
 
         ne_devices = {}
         for device, name in nen_devices:

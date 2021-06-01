@@ -1,4 +1,9 @@
+import abc
 import pickle
+
+from PIL import Image
+import numpy as np
+from dlib import cnn_face_detection_model_v1
 
 from flockai.PyCatascopia.Metrics import *
 from flockai.models.probes.flockai_probe import FlockAIProbe, ProcessCpuUtilizationMetric, ProcessCpuTimeMetric, ProcessIOTimeMetric, \
@@ -27,6 +32,7 @@ non_enableable_devices = [
     (NonEnableableDevice.EMITTER, "emitter"),
     (NonEnableableDevice.LED, "front left led"),
     (NonEnableableDevice.LED, "front right led"),
+    (NonEnableableDevice.DISTANCE_SENSOR, "ds0")
 ]
 
 """""""""""""""""""""
@@ -67,9 +73,56 @@ LOAD A MACHINE LEARNING MODEL AND SET THE INPUTS
 #   a. filename
 #   b. library functions to load and predict
 #   c. input vector sizes and which data
-filename = 'LinReg_model.sav'
-model = pickle.load(open(filename, 'rb'))
+# filename = 'LinReg_model.sav'
+# filename = 'cnnFaceRecognition.bin'
+# model = pickle.load(open(filename, 'rb'))
 
+
+class FlockAIClassifier(abc.ABC):
+    def __init__(self):
+        self.model = None
+
+    @abc.abstractmethod
+    def load_model(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def predict(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_input(self):
+        raise NotImplementedError
+
+
+class FaceDetectionClassifier(FlockAIClassifier):
+    def load_model(self):
+        filename = 'cnnFaceRecognition.bin'
+        self.model = pickle.load(open(filename, 'rb'))
+        self.cnn_face_detector = cnn_face_detection_model_v1(self.model)
+
+    def predict(self, image_filename):
+        image = self._load_image_file(image_filename)
+        print([self._trim_css_to_bounds(self._rect_to_css(face.rect), image.shape) for face in self.cnn_face_detector(image, 1)])
+
+    def set_input(self):
+        pass
+
+    def _trim_css_to_bounds(self, css, image_shape):
+        return max(css[0], 0), min(css[1], image_shape[1]), min(css[2], image_shape[0]), max(css[3], 0)
+
+    def _rect_to_css(self, rect):
+        return rect.top(), rect.right(), rect.bottom(), rect.left()
+
+    def _load_image_file(self, file, mode='RGB'):
+        im = Image.open(file)
+        if mode:
+            im = im.convert(mode)
+        return np.array(im)
+
+
+model = FaceDetectionClassifier()
+model.load_model()
 """""""""""""""""""""""""""""
 START AND RUN THE CONTROLLER
 """""""""""""""""""""""""""""
