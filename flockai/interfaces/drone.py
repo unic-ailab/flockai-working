@@ -2,6 +2,7 @@ import abc
 from flockai.interfaces.robot import IRobot
 import math
 
+from flockai.models.battery.battery import Battery
 from flockai.models.devices.device_enums import EnableableDevice, MotorDevice, AircraftAxis, Relative2DPosition
 from flockai.models.energy.energy import Energy
 from flockai.utils.graphics import Graphics
@@ -15,13 +16,11 @@ class IDrone(IRobot, abc.ABC):
     def __init__(self, devices):
         super().__init__()
         # DEFINE ENERGY CONSTANTS FIRST
-        self.P_COMM = 8.4
-        self.DJI_A3_FC = 8
-        self.RASPBERRY_PI_4B_IDLE = 4
-        self.RASPBERRY_PI_4B_ACTIVE = 8
 
         self.name = self.getName()
         self.energy_model = Energy()
+        self.battery = Battery()
+
         self.basic_time_step = int(self.getBasicTimeStep())
         self.devices = self._attach_and_enable_devices(devices.enableable_devices, devices.non_enableable_devices)
         self.motors = self._attach_and_enable_motors(devices.motor_devices)
@@ -180,14 +179,24 @@ class IDrone(IRobot, abc.ABC):
         self.K_PITCH_P = 30.0  # P constant of the pitch PID
         self.K_YAW_P = 20.0  # P constant of the yaw PID
 
-        self.energy_model.processing_energy.set(p_active=self.RASPBERRY_PI_4B_ACTIVE,
-                                                p_io=self.RASPBERRY_PI_4B_IDLE,
-                                                p_idle=self.RASPBERRY_PI_4B_IDLE,
-                                                p_peripheral=0)
+        # Set E_PROC constants
+        self.energy_model.processing_energy.p_fc = self.energy_model.DJI_A3_FC
+        self.energy_model.processing_energy.p_cpu_active = self.energy_model.RASPBERRY_PI_4B_ACTIVE
+        self.energy_model.processing_energy.p_cpu_idle = self.energy_model.RASPBERRY_PI_4B_IDLE
+        self.energy_model.processing_energy.p_cpu_io = self.energy_model.RASPBERRY_PI_4B_IDLE
 
-        self.energy_model.communication_energy.set(p_transmit=self.P_COMM,
-                                                   p_receive=self.P_COMM,
-                                                   p_idle=self.P_COMM / 2)
+        # Set E_COMM constants
+        self.energy_model.communication_energy.p_transmit = self.energy_model.P_COMM  # 8.4
+        self.energy_model.communication_energy.p_receive = self.energy_model.P_COMM   # 8.4
+        self.energy_model.communication_energy.p_idle = self.energy_model.P_COMM / 2  # 4.2
+
+        # Set BATTERY constants
+        self.battery.capacity = self.battery.DJI_CAPACITY
+        self.battery.voltage = self.battery.DJI_VOLTAGE
+        self.battery.energy = self.battery.DJI_ENERGY
+        self.battery.max_flight_time = self.battery.DJI_MAX_FLIGHT_TIME
+        self.battery.max_hover_time = self.battery.DJI_MAX_HOVERING_TIME
+        self.battery.safe_landing_percentage = self.battery.DJI_SAFE_LANDING_PERCENTAGE
 
     def actuate(self):
         """

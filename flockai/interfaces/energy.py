@@ -4,7 +4,7 @@ import abc
 class IEnergy(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def calculate(self):
+    def calculate(self, *args):
         raise NotImplementedError
 
     @abc.abstractmethod
