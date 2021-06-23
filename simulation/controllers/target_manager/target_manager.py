@@ -49,7 +49,7 @@ last_change = -1
 while supervisor.step(32) != -1:
     while receiver.getQueueLength() > 0:
         message = receiver.getData().decode('utf-8')
-        print('received a message', message)
+        # print('received a message', message)
         if message == 'DESTINATION_ARRIVED':
             if supervisor.getTime() - last_change > 2:
                 print('changing target')

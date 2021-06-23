@@ -1,4 +1,6 @@
 import abc
+import json
+
 from flockai.interfaces.robot import IRobot
 import math
 
@@ -190,10 +192,13 @@ class IDrone(IRobot, abc.ABC):
         self.energy_model.communication_energy.p_receive = self.energy_model.P_COMM   # 8.4
         self.energy_model.communication_energy.p_idle = self.energy_model.P_COMM / 2  # 4.2
 
+        # Set E_MOTOR constants
+        self.energy_model.motor_energy.p_hover = self.energy_model.DJI_P_HOVER
+
         # Set BATTERY constants
-        self.battery.capacity = self.battery.DJI_CAPACITY
+        self.battery.charge_capacity = self.battery.DJI_CHARGE_CAPACITY
         self.battery.voltage = self.battery.DJI_VOLTAGE
-        self.battery.energy = self.battery.DJI_ENERGY
+        self.battery.energy_capacity = self.battery.DJI_ENERGY_CAPACITY
         self.battery.max_flight_time = self.battery.DJI_MAX_FLIGHT_TIME
         self.battery.max_hover_time = self.battery.DJI_MAX_HOVERING_TIME
         self.battery.safe_landing_percentage = self.battery.DJI_SAFE_LANDING_PERCENTAGE
@@ -214,7 +219,12 @@ class IDrone(IRobot, abc.ABC):
         self.camera_pitch_motor.setPosition(-0.1 * pitch_acceleration)
 
         # Get input
-        roll_disturbance, pitch_disturbance, yaw_disturbance = self.get_input()
+        if self.battery.remaining_energy_percentage <= self.battery.safe_landing_percentage:
+            roll_disturbance, pitch_disturbance, yaw_disturbance = 0, 0, 0
+            self.target_altitude -= 0.05
+            print('Safe landing')
+        else:
+            roll_disturbance, pitch_disturbance, yaw_disturbance = self.get_input()
 
         roll_input = self.K_ROLL_P * Graphics.clamp(roll, -1.0, 1.0) + roll_acceleration + roll_disturbance
         pitch_input = self.K_PITCH_P * Graphics.clamp(pitch, -1.0, 1.0) - pitch_acceleration + pitch_disturbance
@@ -233,6 +243,41 @@ class IDrone(IRobot, abc.ABC):
         self.front_right_motor.setVelocity(-front_right_motor_input)
         self.rear_left_motor.setVelocity(-rear_left_motor_input)
         self.rear_right_motor.setVelocity(rear_right_motor_input)
+
+    def send_msg(self, msg, emitter_devices: list):
+        """
+        Sends a message from the attached emitter device
+        :param emitter_devices: The emitter devices to send the message
+        :param msg: The message to send
+        :return: Time required to send the message
+        """
+        for emitter in emitter_devices:
+            if emitter not in self.devices:
+                print(f"The specified emitter device is not found: {emitter}")
+                return 0
+            f_emitter = self.devices[emitter]['device']
+            message = json.dumps(msg)
+            f_emitter.send(message.encode('utf-8'))
+
+    def receive_msgs(self, receiver_devices: list):
+        """
+        Receive messages on the receiver device
+        :param receiver_devices: The receiver device name as a string
+        :return: The list of messages and the time required to receive them
+        """
+        messages = []
+
+        for receiver in receiver_devices:
+            if receiver not in self.devices:
+                print(f"The specified receiver device is not found: {receiver}")
+                return [], 0
+            f_receiver = self.devices[receiver]['device']
+            while f_receiver.getQueueLength() > 0:
+                message_received = f_receiver.getData().decode('utf-8')
+                messages.append(message_received)
+                f_receiver.nextPacket()
+
+        return messages
 
     @abc.abstractmethod
     def get_input(self) -> tuple:

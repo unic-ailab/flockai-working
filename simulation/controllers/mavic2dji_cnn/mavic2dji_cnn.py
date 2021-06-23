@@ -57,7 +57,7 @@ metrics = [
     ProbeAliveTimeMetric('probe_alive_time', 's', 'time probe is alive', minVal=0, higherIsBetter=False),
     ProcessMemoryMetric('mem_pct', '%', 'process-level memory utilization', minVal=0, higherIsBetter=False),
 ]
-probe = FlockAIProbe(metrics, name='Example Probe', periodicity=5)
+probe = FlockAIProbe(metrics, name='Example Probe', periodicity=1)
 
 """""""""""""""""""""""""""""
 INITIALIZE THE CONTROLLER
@@ -104,6 +104,7 @@ class FaceDetectionClassifier(FlockAIClassifier):
             return None
 
         image_filename = self._get_model_input()
+        # return image_filename
         image = self._load_image_file(image_filename)
         return [self._trim_css_to_bounds(self._rect_to_css(face.rect), image.shape) for face in self.cnn_face_detector(image, 1)]
 

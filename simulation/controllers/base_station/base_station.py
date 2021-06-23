@@ -91,9 +91,9 @@ class BaseStation(IBaseStation):
 
             # Receive messages
             received_messages = self.receive_msgs(receiver_devices)
-            if len(received_messages) > 0:
-                print('Received a message')
-                # print("Received message:", received_messages)
+            # if len(received_messages) > 0:
+            #     print('Received a message')
+            #     # print("Received message:", received_messages)
 
 
 enableable_devices = [

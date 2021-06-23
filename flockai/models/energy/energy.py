@@ -16,7 +16,7 @@ class MotorEnergy(IEnergy):
     def calculate(self, hovering_time):
         self.e_hover = self.p_hover * hovering_time
         return {"e_hover": self.e_hover,
-                "e_motor_total": self.e_hover + self.e_move + self.e_takeoff}
+                "e_motor": self.e_hover + self.e_move + self.e_takeoff}
 
     def set(self, *args, **kwargs):
         pass
