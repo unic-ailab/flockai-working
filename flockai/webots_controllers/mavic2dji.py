@@ -46,7 +46,7 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
         return self.energy_model.processing_energy.calculate(cpu_time_active=cpu_time, flight_time=flight_time, io_time=io_time)
 
-    def get_communication_energy(self, start_flight_time,comm_transmit_time, comm_receive_time):
+    def get_communication_energy(self, start_flight_time, comm_transmit_time, comm_receive_time):
         probe_alive_time = self.probe.get_metric('ProbeAliveTimeMetric')
         flight_time = time.time() - start_flight_time
         return self.energy_model.communication_energy.calculate(transmit_time=comm_transmit_time, receive_time=comm_receive_time, idle_time=flight_time-(comm_transmit_time + comm_receive_time))
@@ -75,6 +75,7 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
         comm_transmit_time = 0
         comm_receive_time = 0
+        inference_time = 0
 
         start_flight_time = time.time()
         while self.step(self.basic_time_step) != -1:
@@ -96,7 +97,11 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
             # Execute prediction pipeline step
             if self.model is not None:
+                t1 = time.time()
                 prediction = self.model.predict()
+                t2 = time.time()
+                inference_time += t2 - t1
+
                 # t1 = time.time()
                 # self.send_msg(msg=str(prediction), emitter_devices=emitter_devices)
                 # t2 = time.time()
@@ -108,7 +113,9 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
             # Get energy values on each cycle
             energy = {**self.get_processing_energy(start_flight_time=start_flight_time),
                       **self.get_communication_energy(start_flight_time=start_flight_time, comm_transmit_time=comm_transmit_time, comm_receive_time=comm_receive_time),
-                      **self.get_motor_energy(start_flight_time=start_flight_time), 'simulation_time_s': self.getTime()}
+                      **self.get_motor_energy(start_flight_time=start_flight_time), 'simulation_time_s': self.getTime(),
+                      'cpu_time_s': self.probe.get_metric('ProcessCpuTimeMetric').get_val(),
+                      'inference_time_s': inference_time}
 
             energy['total_energy'] = energy['e_proc'] + energy['e_comm'] + energy['e_motor']
 
@@ -120,7 +127,7 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
             # Update log data every 5 minutes with energy values
             print(energy, f'\n{self.battery.remaining_energy_percentage * 100}% battery remaining')
-            with open('logs/ML_on_drone_no_flight_probe_2.json', 'a+') as logfile:
+            with open('logs/CNN_on_drone_no_flight_probe.json', 'a+') as logfile:
                 json.dump(energy, logfile)
                 logfile.write('\n')
 
