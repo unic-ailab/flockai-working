@@ -75,7 +75,7 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
         comm_transmit_time = 0
         comm_receive_time = 0
-        inference_time = 0
+        cumm_inference_time = 0
 
         start_flight_time = time.time()
         while self.step(self.basic_time_step) != -1:
@@ -96,11 +96,13 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
             # comm_receive_time += t2 - t1
 
             # Execute prediction pipeline step
+            inference_time = 0
             if self.model is not None:
                 t1 = time.time()
                 prediction = self.model.predict()
                 t2 = time.time()
-                inference_time += t2 - t1
+                inference_time = t2 - t1
+                cumm_inference_time += inference_time
 
                 # t1 = time.time()
                 # self.send_msg(msg=str(prediction), emitter_devices=emitter_devices)
@@ -115,7 +117,8 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
                       **self.get_communication_energy(start_flight_time=start_flight_time, comm_transmit_time=comm_transmit_time, comm_receive_time=comm_receive_time),
                       **self.get_motor_energy(start_flight_time=start_flight_time), 'simulation_time_s': self.getTime(),
                       'cpu_time_s': self.probe.get_metric('ProcessCpuTimeMetric').get_val(),
-                      'inference_time_s': inference_time}
+                      'inference_time_s': inference_time,
+                      'cumm_inference_time_s': cumm_inference_time}
 
             energy['total_energy'] = energy['e_proc'] + energy['e_comm'] + energy['e_motor']
 
@@ -127,7 +130,7 @@ class KeyboardMavic2DJI(KeyboardControlledDrone):
 
             # Update log data every 5 minutes with energy values
             print(energy, f'\n{self.battery.remaining_energy_percentage * 100}% battery remaining')
-            with open('logs/CNN_on_drone_no_flight_probe.json', 'a+') as logfile:
+            with open('logs/Crowd_Detection_on_drone_no_flight_probe.json', 'a+') as logfile:
                 json.dump(energy, logfile)
                 logfile.write('\n')
 
