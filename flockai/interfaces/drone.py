@@ -40,6 +40,7 @@ class IDrone(IRobot, abc.ABC):
         for device, name, *sampling_period in en_devices:
             time_step = self.basic_time_step if len(sampling_period) == 0 else sampling_period[0]
 
+            print('Enabling: ', name, ' ---- ', device)
             if EnableableDevice(device) == EnableableDevice.KEYBOARD:
                 e_devices['keyboard'] = {'type': device, 'device': self.keyboard}
                 e_devices['keyboard']['device'].enable(time_step)
