@@ -74,6 +74,6 @@ Check the relevant documentation on each controller to make the appropriate chan
   5. Crowd detection
   6. and more!
 
-![teaser](images/teaser.png "teaser")
+![teaser](images/teaser.png "flockai teaser")
 
 
