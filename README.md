@@ -20,18 +20,18 @@ Integrating FlockAI with Webots requires the FlockAI controllers to be placed in
 ### Checking installed python version
 Upon launching Webots navigate to `Tools->Preferences` and identify the command that Webots uses to run its python controllers.
 
-![webots python command](webots-python-command.png "Webots Python Command")
+![webots python command](images/webots-python-command.png "Webots Python Command")
 
 Then, launch a terminal (or command prompt) and type the same command to identify your default python version.
 
-![system python command](system-python-command.png "System Python Command")
+![system python command](images/system-python-command.png "System Python Command")
 
 After the version is identified, the corresponding Webots controller directory needs to be noted down.
 
 ### Identifying Webots controller directory
 Navigate to the directory that Webots was installed and copy the corresponding controller path to your clipboard.
 
-![webots controller directory](webots-controller-directory.PNG "Webots Controller Directory")
+![webots controller directory](images/webots-controller-directory.PNG "Webots Controller Directory")
 ![copy path](copy-path.png "Copy Path")
 
 Once the controller path is copied, flockai should be installed in to that directory
@@ -41,7 +41,7 @@ Run the following command and make sure webots is installed in the destination d
 
 `pip install --no-cache-dir --upgrade --target="your/webots/controller/directory" flockai`
 
-![install flockai](install-flockai.PNG "Installing flockai")
+![install flockai](images/install-flockai.PNG "Installing flockai")
 
 ## Download FlockAI Sample Worlds and Tests from Git Repo
 
@@ -59,12 +59,12 @@ Navigate to the installed folder  and execute the following command to install p
 
 In Webots, navigate to `File->Open World` and load one of the sample worlds our team has developed
 
-![open world file](world-files.png "Open sample world file")
+![open world file](images/world-files.png "Open sample world file")
 
 #### Load sample controllers on your robots
 
 Check the relevant documentation on each controller to make the appropriate changes on your world's objects
-![sample controllers](sample-controllers.PNG "Sample controllers")
+![sample controllers](images/sample-controllers.PNG "Sample controllers")
 
 ## Give FlockAI a Go and Have Fun!
 	1. Keyboard-Based Navigation
@@ -73,5 +73,7 @@ Check the relevant documentation on each controller to make the appropriate chan
   4. Face detection with deep learning
   5. Crowd detection
   6. and more!
+
+![teaser](images/teaser.png "teaser")
 
 
