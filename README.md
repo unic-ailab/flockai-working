@@ -1,49 +1,77 @@
-# Flock AI
+# FlockAI - A Framework for Rapidly Testing ML-Driven Drone Applications
+FlockAI, an open and modular by design framework supporting users with the rapid deployment and repeatable testing during the design phase of ML-driven drone applications.
 
-### About
-This repository contains
-- Flock AI: A machine learning python library which is designed as a plugin for webots.
-- Webots simulations: Sample simulations that demonstrate the usage of Flock AI
+FlockAI can be used to design drone testbeds with "ready-to-go" drone templates, deploy ML models, configure on-board/remote inference, monitor and export drone resource utilization, network overhead and energy consumption to pinpoint performance inefficiencies and understand if various trade-offs can be exploited. 
+
+Find out more about FlockAI by simply visiting our [website](https://unic-ailab.github.io/flockai/).
+
+## Installing Webots Robotics Simulator
+FlockAI currently features integration endpoints with the Webots robotics simulator. Therefore, to use FlockAI, Webots must be previously installed on your computing environment. 
+
+The installation of process of Webots is pretty straightforward for any OS environment (Linux, macOS, Windows) and instructions can be found [here](https://cyberbotics.com/doc/guide/installing-webots).
+
+Note: FlockAI requires a version of Webots above *R2021a* and we recommend using version **R2021a** where all offered tests and simulations worlds have been tested for. You can select versions from [here](https://github.com/cyberbotics/webots/releases)
+
+## Installing FlockAI and Webots Endpoints
+Before we download dependencies and FlockAI, make sure that pip is up-to-date (>22.x) and that Cmake is [installed](https://cmake.org/install/).
+
+Integrating FlockAI with Webots requires the FlockAI controllers to be placed in the respected Python environment of Webots. We have made this process easy and requires only the following steps:
+
+### Checking installed python version
+Upon launching Webots navigate to `Tools->Preferences` and identify the command that Webots uses to run its python controllers.
+
+![webots python command](webots-python-command.png "Webots Python Command")
+
+Then, launch a terminal (or command prompt) and type the same command to identify your default python version.
+
+![system python command](system-python-command.png "System Python Command")
+
+After the version is identified, the corresponding Webots controller directory needs to be noted down.
+
+### Identifying Webots controller directory
+Navigate to the directory that Webots was installed and copy the corresponding controller path to your clipboard.
+
+![webots controller directory](webots-controller-directory.PNG "Webots Controller Directory")
+![copy path](copy-path.png "Copy Path")
+
+Once the controller path is copied, flockai should be installed in to that directory
+
+### Installing FlockAI to the Webots controller directory
+Run the following command and make sure webots is installed in the destination directory
+
+`pip install --no-cache-dir --upgrade --target="your/webots/controller/directory" flockai`
+
+![install flockai](install-flockai.PNG "Installing flockai")
+
+## Download FlockAI Sample Worlds and Tests from Git Repo
+
+### Clone the FlockAI repo on your system
+
+`git clone https://github.com/unic-ailab/flockai-working.git`
+
+### Install requirements
+
+Navigate to the installed folder  and execute the following command to install python requirements
+
+`pip install -r requirements.txt`
+
+### Open one of the sample worlds located in the simulation directory
+
+In Webots, navigate to `File->Open World` and load one of the sample worlds our team has developed
+
+![open world file](world-files.png "Open sample world file")
+
+#### Load sample controllers on your robots
+
+Check the relevant documentation on each controller to make the appropriate changes on your world's objects
+![sample controllers](sample-controllers.PNG "Sample controllers")
+
+## Give FlockAI a Go and Have Fun!
+	1. Keyboard-Based Navigation
+	2. Autopilot Navigation
+  3. ML sensor value prediction with linear regression
+  4. Face detection with deep learning
+  5. Crowd detection
+  6. and more!
 
 
-### Webots
-- Nightly Version: [r2020b-rev2](https://github.com/cyberbotics/webots/releases)
-- Release: [R2020b-rev1](https://github.com/cyberbotics/webots/releases/tag/R2020b-rev1)
-- Installation steps per OS can be found [here](https://cyberbotics.com/doc/guide/installation-procedure).
-
-### Development
-
-##### Prerequisites
-1. Set up the [webots required enviroment variables](https://cyberbotics.com/doc/guide/running-extern-robot-controllers?tab-language=python&tab-os=linux#environment-variables)
-2. Create a `.pypirc` file which will contain the pypi credentials:
-  ``` 
-    [distutils]
-    index-servers= pypi
-    
-    [pypi]
-    repository = https://upload.pypi.org/legacy/
-    username = the_username
-    password = the_password
-  ```
-
-##### Running the first time
-1. `make config`
-    Copies the `.pypirc` to your user home folder and allows automated uploads using twine.
-2. `make requirements`
-    Installs project requirements.
-3. `make package`
-    Generates the new package under the `dist/` directory.
-4. `make upload`
-    Uploads the package in the specified pypi repository.  
-5. `make install`
-    Installs Flock AI in Webots home folder to be used as a library.
-6. `make clean` (*Optional*)
-    Cleans the build directory. This step should be done before rebuilding the package.
-
-##### Development pipelines
-1. `make`
-    Clean previous build files, builds new package, uploads to pypi.
-2. `make install`
-    Installs new version of Flock AI in Webots home folder to be used as a library.
-
- 
