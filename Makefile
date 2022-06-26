@@ -1,17 +1,10 @@
-all: clean package upload install
+all: clean package install
 
 package:
 	python3 setup.py sdist bdist_wheel
 
-config:
-	cat .pypirc > ~/.pypirc
-	sudo -S chmod 600 ~/.pypirc
-
-upload:
-	python3 -m twine upload dist/*
-
 install:
-	python3 -m pip install --no-cache-dir --upgrade --target=$(PYTHONPATH) flockai
+	python3 -m pip install --no-cache-dir --upgrade --target=$(PYTHONPATH) dist/flockai*.whl
 
 requirements:
 	python3 -m pip install --user -r requirements.txt

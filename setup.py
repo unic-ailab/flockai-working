@@ -6,32 +6,11 @@ def get_description():
         long_description = fh.read()
     return long_description
 
-
-def get_next_version():
-    version = {
-        "major": None,
-        "minor": None,
-        "patch": None
-    }
-
-    with open("version", "r") as f:
-        lines = f.readlines()
-        version["major"] = lines[0]
-        version["minor"] = lines[1]
-        version["patch"] = str(int(lines[2]) + 1)
-
-    with open("version", "w") as f:
-        f.writelines([version["major"], version["minor"], version["patch"], ''])
-
-    return version
-
-
-version = get_next_version()
 readme = get_description()
 
 setuptools.setup(
     name="flockai",
-    version='.'.join([version["major"][:-1], version["minor"][:-1], version["patch"]]),
+    version='0.0.1',
     author="kosnet",
     author_email="kosnet@kosnet.com",
     description="A machine learning webots extension",
