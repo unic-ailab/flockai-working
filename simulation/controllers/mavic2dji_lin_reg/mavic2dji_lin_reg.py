@@ -1,5 +1,4 @@
 import pickle
-from PIL import Image
 import numpy as np
 from flockai.interfaces.flockai_ml import FlockAIClassifier
 from flockai.models.probes.flockai_probe import FlockAIProbe, ProcessCpuUtilizationMetric, ProcessCpuTimeMetric, ProcessIOTimeMetric, \
@@ -50,9 +49,6 @@ devices = Devices(enableable_devices, non_enableable_devices, motor_devices)
 """""""""""""""""""""""""""
 CREATE MONITORING PROBES
 """""""""""""""""""""""""""
-# 1. Create a probe interface where the use defines what metrics he wants to use
-# 2. Based on the probes that the user wants to use flockai should behave accordingly
-
 metrics = [
     ProcessCpuUtilizationMetric(name='cpu_pct', units='%', desc='process-level cpu utilization', minVal=0, higherIsBetter=False),
     ProcessCpuTimeMetric('cpu_time', 's', 'process-level cpu time', minVal=0, higherIsBetter=False),
@@ -66,7 +62,7 @@ probe = FlockAIProbe(metrics, name='Example Probe', periodicity=5)
 """""""""""""""""""""""""""""
 INITIALIZE THE CONTROLLER
 """""""""""""""""""""""""""""
-controller = KeyboardMavic2DJI(devices=devices, probe=probe)
+controller = KeyboardMavic2DJI(devices=devices, probe=probe, log_dir='keyboard_controlled_linear_regression.json', debug=False)
 
 
 class LinearRegressionClassifier(FlockAIClassifier):

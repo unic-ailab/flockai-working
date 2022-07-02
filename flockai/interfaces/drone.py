@@ -15,9 +15,10 @@ class IDrone(IRobot, abc.ABC):
     Define all actions needed for flying a drone and declare the get_input() abstract method
     """
 
-    def __init__(self, devices):
+    def __init__(self, devices, debug=False):
         super().__init__()
         # DEFINE ENERGY CONSTANTS FIRST
+        self.debug=debug
 
         self.name = self.getName()
         self.energy_model = Energy()
@@ -31,6 +32,7 @@ class IDrone(IRobot, abc.ABC):
         self._set_constants()
         self._set_variables()
 
+
     def _attach_and_enable_devices(self, en_devices, nen_devices):
         """
         Define all the required devices and enable them
@@ -40,7 +42,9 @@ class IDrone(IRobot, abc.ABC):
         for device, name, *sampling_period in en_devices:
             time_step = self.basic_time_step if len(sampling_period) == 0 else sampling_period[0]
 
-            print('Enabling: ', name, ' ---- ', device)
+            if self.debug:
+                print('Enabling: ', name, ' ---- ', device)
+
             if EnableableDevice(device) == EnableableDevice.KEYBOARD:
                 e_devices['keyboard'] = {'type': device, 'device': self.keyboard}
                 e_devices['keyboard']['device'].enable(time_step)

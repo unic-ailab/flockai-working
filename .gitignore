@@ -139,3 +139,7 @@ simulation/controllers/mavic2dji_cnn/logs/Images/*
 
 # Running simulations
 simulation/worlds/.*
+
+# Logs
+*.json
+

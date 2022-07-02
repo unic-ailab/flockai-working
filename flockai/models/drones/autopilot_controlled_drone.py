@@ -5,8 +5,8 @@ from flockai.interfaces.drone import IDrone
 
 
 class AutopilotControlledDrone(IDrone, abc.ABC):
-    def __init__(self, devices):
-        super().__init__(devices)
+    def __init__(self, devices, debug):
+        super().__init__(devices, debug)
         self.multiplier = 1
         self.target_id_count = 0
 
@@ -23,9 +23,11 @@ class AutopilotControlledDrone(IDrone, abc.ABC):
         if total_targets > 0:
             self.target_id_count += 1
             for i in range(total_targets):
-                print(f'--target {i}: distance = {targets[i].distance} azimuth = {targets[i].azimuth}')
+                if self.debug:
+                    print(f'--target {i}: distance = {targets[i].distance} azimuth = {targets[i].azimuth}')
                 if targets[i].distance < 2.5:
-                    print('emitting')
+                    if self.debug:
+                        print('emitting')
                     emitter = self.devices['emitter']['device']
                     message = 'DESTINATION_ARRIVED'
                     emitter.send(message.encode('utf-8'))
