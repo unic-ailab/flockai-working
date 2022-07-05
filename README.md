@@ -69,11 +69,31 @@ Check the relevant documentation on each controller to make the appropriate chan
 ## Give FlockAI a Go and Have Fun!
 	1. Keyboard-Based Navigation
 	2. Autopilot Navigation
-  3. ML sensor value prediction with linear regression
-  4. Face detection with deep learning
-  5. Crowd detection
-  6. and more!
+	3. ML sensor value prediction with linear regression
+	4. Face detection with deep learning
+	5. Crowd detection
+	6. and more!
 
 ![teaser](images/teaser.png "flockai teaser")
+
+## Even Simpler Installation and Updating Process
+To make the installation and updating process even simpler, FlockAI now features a python wheel for easy deployment.
+First, open the `environmental_variables.txt` file and update the `WEBOTS_PYTHON_PATH` to where your python controller of Webots is (see above). Next, just use `make` for the rest.
+
+### To update FlockAI:
+`
+make all
+`
+
+### First time setup:
+`
+make requirements
+`
+### package build download and install:
+`
+make package
+make install
+//or simply just use... make all
+`
 
 
