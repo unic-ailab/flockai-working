@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# The webots installation directory
-export WEBOTS_HOME="your/path/to/webots/install/directory"
 
-# The flockai installation directory
-export PYTHONPATH="webots/directory/lib/your_python_version"
+# The flockai webots installation directory
+export WEBOTS_PYTHON_PATH="/Applications/Webots.app/lib/controller/python37/"
