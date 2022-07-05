@@ -89,11 +89,16 @@ make all
 `
 make requirements
 `
-### package build download and install:
+### Package build download and install:
 `
 make package
+`
+`
 make install
-//or simply just use... make all
+`
+or simply just use... 
+`
+make all
 `
 
 
