@@ -1,55 +1,35 @@
-# Flockai for machine learning
+# FlockAI Demo
 
-## Integrating flockai with Webots
+Note: this demo was created to showcase the FlockAI feature set during the IEEE ICDCS 2022 conference, held in Bologna, Italy (July 2022).
 
-Since flockai is a framework built on top of Webots, it needs to be installed to the corresponding Webots controller' s directory.
-The steps are described below:
-#### 1. Checking installed python version
-Upon launching Webots navigate to Tools->Preferences and identify the python command your Webots application uses to run controllers.
+## Step 0: Prerequisites
+Install Webots and FlockAI on your environment. If you dont have a running installation of FlockAI then take a look at our getting started guide [here](https://github.com/unic-ailab/flockai-working/)
 
-![webots python command](webots-python-command.png "Webots Python Command")
+## Step 1: Download Simulation World
+If your FlockAI git repo is up-to-date then you already have the required simulation world on your environment but if not, simply do a quick `git pull` to make sure the `keyboard_and_autopilot.wbt` world is downloaded locally.
 
-Then, launch a terminal (or command prompt) and type the same command to identify your default python version.
+## Step 2: Load the Simulation World
+After downloading the simulation world, simply `File->Open World` and navigate to the simulation world found in your local FlockAI git repo.
 
-![system python command](system-python-command.png "System Python Command")
+![load world](images/demo_load_world.png "load world")
 
-After the version is identified, the corresponding Webots controller directory needs to be noted down.
-#### 2. Identifying Webots controller directory
-Navigate to the directory that Webots was installed and copy the corresponding controller path to your clipboard.
+## Step 3: Give the Simulation a Go!
+The simulation starts with two drones pre-configured and ready to go! 
 
-![webots controller directory](webots-controller-directory.PNG "Webots Controller Directory")
-![copy path](copy-path.png "Copy Path")
+Drone 1 is keyboard navigated and upon simulation start it just takes-off and hovers until you decide to move it as you please. While you do so, monitoring data is being collected and printed to the console. In turn, a linear regression model is loaded and it performs inference using dummy temperature and humidity data.
 
-Once the controller path is copied, flockai should be installed in to that directory
+![keyboard drone](images/keyboard_drone.png "keyboard drone")
 
-#### 3. Installing FlockAI to the Webots controller directory
-Run the following command and make sure webots is installed in the destination directory
+Drone 2 is in autopilot mode and upon simulation start it takes-off. Navigation is controlled by performing face-recognition on targets that have been randomly placed in the simulation world. When the drone finds a face it navigates towards it automatically! In the default setting, navigation data is printed on the console.
 
-`pip install --no-cache-dir --upgrade --target="your/webots/controller/directory" flockai`
+![autopilot drone](images/autopilot_drone.png "autopilot drone")
 
-![install flockai](install-flockai.PNG "Installing flockai")
+## Step 4: Configure as you wish the simulation!
+Now that everything is running and you took the drones for a spin :) you may configure as you wish the simulation. Configuration includes persistently storing the data, changing ML models (i.e., LR to CNN), seeing debuging information, adding/removing monitoring probes, adding/removing sensors.
 
-## Installing sample worlds, controllers and dependencies
+To make things easier, the controllers of this world have commented out configurations.
 
-#### 1. Installing flockai repo
+![configs drone](images/autopilot_drone_configs.png "autopilot drone configs")
 
-Clone the flockai repo on your system
-
-`git clone https://github.com/unic-ailab/flockai-working.git`
-
-#### 2. Installing requirements
-
-Navigate to the installed folder  and execute the following command to install python requirements
-
-`pip install -r requirements.txt`
-
-#### 3. Open one of the sample worlds located in the _simulation_ directory
-
-In Webots, navigate to File->Open World... and load one of the sample worlds our team has developed
-
-![open world file](world-files.png "Open sample world file")
-
-#### 4. Load sample controllers on your robots
-
-Check the relevant documentation on each controller to make the appropriate changes on your world's objects
-![sample controllers](sample-controllers.PNG "Sample controllers")
+## Citation
+**Demo: FlockAI - A Framework for Rapidly Testing ML-Driven Drone Applications**. Trihinas, D.; Agathocleous, M.; and Avogian, K. In 2022 IEEE 42nd International Conference on Distributed Computing Systems (ICDCS), 2022.
