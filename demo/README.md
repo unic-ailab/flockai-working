@@ -22,7 +22,7 @@ Drone 1 is keyboard navigated and upon simulation start it just takes-off and ho
 
 Drone 2 is in autopilot mode and upon simulation start it takes-off. Navigation is controlled by performing face-recognition on targets that have been randomly placed in the simulation world. When the drone finds a face it navigates towards it automatically! In the default setting, navigation data is printed on the console.
 
-![autopilot drone](images/autopilot_drone.png "autopilot drone")
+![autopilot drone](autopilot_drone.png "autopilot drone")
 
 ## Step 4: Configure as you wish the simulation!
 Now that everything is running and you took the drones for a spin :) you may configure as you wish the simulation. Configuration includes persistently storing the data, changing ML models (i.e., LR to CNN), seeing debuging information, adding/removing monitoring probes, adding/removing sensors.
