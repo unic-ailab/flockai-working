@@ -11,14 +11,14 @@ If your FlockAI git repo is up-to-date then you already have the required simula
 ## Step 2: Load the Simulation World
 After downloading the simulation world, simply `File->Open World` and navigate to the simulation world found in your local FlockAI git repo.
 
-![load world](images/demo_load_world.png "load world")
+![load world](demo_load_world.png "load world")
 
 ## Step 3: Give the Simulation a Go!
 The simulation starts with two drones pre-configured and ready to go! 
 
 Drone 1 is keyboard navigated and upon simulation start it just takes-off and hovers until you decide to move it as you please. While you do so, monitoring data is being collected and printed to the console. In turn, a linear regression model is loaded and it performs inference using dummy temperature and humidity data.
 
-![keyboard drone](images/keyboard_drone.png "keyboard drone")
+![keyboard drone](keyboard_drone.png "keyboard drone")
 
 Drone 2 is in autopilot mode and upon simulation start it takes-off. Navigation is controlled by performing face-recognition on targets that have been randomly placed in the simulation world. When the drone finds a face it navigates towards it automatically! In the default setting, navigation data is printed on the console.
 
@@ -29,7 +29,7 @@ Now that everything is running and you took the drones for a spin :) you may con
 
 To make things easier, the controllers of this world have commented out configurations.
 
-![configs drone](images/autopilot_drone_configs.png "autopilot drone configs")
+![configs drone](autopilot_drone_configs.png "autopilot drone configs")
 
 ## Citation
 **Demo: FlockAI - A Framework for Rapidly Testing ML-Driven Drone Applications**. Trihinas, D.; Agathocleous, M.; and Avogian, K. In 2022 IEEE 42nd International Conference on Distributed Computing Systems (ICDCS), 2022.
